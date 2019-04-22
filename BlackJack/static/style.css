@@ -1,0 +1,24 @@
+nav{
+    background-color: palegoldenrod;
+    border: black solid;
+    width: 100%;
+}
+
+nav ul{
+    color: whitesmoke;
+    list-style-type: none;
+    padding: 1%;
+}
+
+nav ul li{
+    display: inline;
+    border: solid black;
+    margin: 2%;
+    padding: 1% 4%;
+    background-color: palegoldenrod;
+
+}
+
+nav ul li.hover{
+    color: orangered;
+}
