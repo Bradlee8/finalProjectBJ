@@ -47,6 +47,7 @@
                 this.totalBet = 0;
                 this.second = [];//second hand in the split
                 this.secondHandValue = 0;
+                this.goSplit = false;
             }
 
             getPlayerCards() {
@@ -61,8 +62,8 @@
                 this.playerHand.push(deck.deck.pop());
                 console.log(this.playerHand);
                 console.log("player hand value ", this.playerHandValue);
-                player.aceToOne();
-                player.getPlayerCards();
+                this.aceToOne();
+                this.getPlayerCards();
                 deck.checkPoints();
             }
 
@@ -70,76 +71,115 @@
                 deck.dealerPlay();
             }
 
+            checkBankrupt() {
+                    if (this.bank === 0) {
+                        if (window.confirm("You are Broke!\nWant a loan?")) {
+                            this.bank = 500;
+                            deck.updateMSG();
+                    }
+                }
+            }
+
             bet() {
-                console.log(this.bank);
-                let bet = 50;
-                this.totalBet += 50;
-                this.bank = this.bank - bet;
-                console.log("player bet 50 ", this.bank);
-                deck.pot += 50;
-                deck.updateMSG();
+                if (this.playerHandValue === 0 && this.bank > 0) {
+                    console.log(this.bank);
+                    let bet = 50;
+                    this.totalBet += 50;
+                    this.bank = this.bank - bet;
+                    console.log("player bet 50 ", this.bank);
+                    deck.pot += 50;
+                    deck.updateMSG();
+                }
             }
 
             split() {
-                //if
-                let g = document.getElementById("player");
-                g.innerHTML = player.name + " 1st Hand: Bank: " + player.bank;
-                player.playerHandValue -= player.playerHand[1].PointValue;
-                player.second.push(this.playerHand[1]);
-                player.secondHandValue = player.second[0].PointValue;
-                this.playerHand.pop();
-                player.playerHandValue += deck.getValue();
-                this.playerHand.push(deck.deck.pop());
-                for (let h = 0; h < this.playerHand.length; h++) {
-                    let q = document.getElementById(h + 5);
-                    q.src = this.playerHand[h].Card;
+                if (this.playerHand[0].Value === this.playerHand[1].Value) {
+                    let g = document.getElementById("player");
+                    g.innerHTML = this.name + " 1st Hand: Bank: " + this.bank;
+                    this.playerHandValue -= this.playerHand[1].PointValue;
+                    this.second.push(this.playerHand[1]);
+                    this.secondHandValue = this.second[0].PointValue;
+                    this.playerHand.pop();
+                    this.playerHandValue += deck.getValue();
+                    this.playerHand.push(deck.deck.pop());
+                    for (let h = 0; h < this.playerHand.length; h++) {
+                        let q = document.getElementById(h + 5);
+                        q.src = this.playerHand[h].Card;
+                    }
+                    let text = " Must play Second Hand First ";
+                    let u = document.getElementById("winner");
+                    u.innerHTML = "<h1>" + text.fontcolor("white") + "</h1>";
+                    this.bank -= this.totalBet;
+                    deck.updateMSG();
+                    let t = document.getElementById("player2nd");
+                    t.innerHTML = this.name + " 2nd Hand: Bank: " + this.bank;
+                    this.secondHandValue += deck.getValue();
+                    this.second.push(deck.deck.pop());
+                    for (let z = 0; z < this.second.length; z++) {
+                        let x = document.getElementById(z + 10);
+                        x.src = this.second[z].Card;
+                        console.log("playerHand " + this.playerHandValue);
+                    }
+                    this.aceToOne();
+                    this.checkSplitPoints();
+                    this.goSplit = true;
                 }
-                this.bank -= this.totalBet;
-                deck.updateMSG();
-                let t = document.getElementById("player2nd");
-                t.innerHTML = player.name + " 2nd Hand: Bank: " + player.bank;
-                player.secondHandValue += deck.getValue();
-                player.second.push(deck.deck.pop());
-                for (let z = 0; z < player.second.length; z++) {
-                    let x = document.getElementById(z + 10);
-                    x.src = player.second[z].Card;
-                    console.log("playerHand " + player.playerHandValue);
-                }
-                player.checkSplitPoints();
-
             }
 
             splitHit() {
-                player.secondHandValue += deck.getValue();
-                console.log("3 SEcond hand value " + player.secondHandValue);
-                player.second.push(deck.deck.pop());
-                for (let z = 0; z < player.second.length; z++) {
-                    let x = document.getElementById(z + 10);
-                    x.src = player.second[z].Card;
-
+                if (this.goSplit === true) {
+                    this.secondHandValue += deck.getValue();
+                    console.log("3 SEcond hand value " + this.secondHandValue);
+                    this.second.push(deck.deck.pop());
+                    for (let z = 0; z < this.second.length; z++) {
+                        let x = document.getElementById(z + 10);
+                        x.src = this.second[z].Card;
+                    }
+                    console.log("second " + this.secondHandValue);
+                    this.aceToOne();
+                    this.checkSplitPoints();
                 }
-                console.log("second " + player.secondHandValue);
-                player.aceToOne();
-                this.checkSplitPoints();
             }
 
+            firstHand() {
+                let text = "Now play First Hand";
+                let y = document.getElementById("winner");
+                y.innerHTML = "<h1>" + text.fontcolor("white") + "</h1>";
+            }
+
+            staySecond() {
+                this.goSplit = false;
+                this.secondHandMessage("Stayed");
+                this.firstHand();
+            }
+
+            secondHandMessage(x) {
+                let text = x;
+                let q = document.getElementById("player2nd");
+                q.innerHTML = "<h3>" + text.fontcolor("red") + "</h3>";
+            }
 
             checkSplitPoints() {
-                if (player.secondHandValue > 21) {
+                if (this.secondHandValue > 21) {
+                    this.secondHandMessage("-BUSTED-");
                     console.log("Second Hand Busts");
-
+                    this.firstHand();
                 }
-                if (player.secondHandValue === 21) {
-
+                if (this.secondHandValue === 21) {
+                    this.firstHand();
+                    this.secondHandMessage("BLACKJACK !");
                 }
-                if (player.secondHandValue < 22 && player.second[4] != null) {
-                    player.secondHandValue = 21;
+                if (this.secondHandValue < 22 && this.second[4] != null) {
+                    this.secondHandValue = 21;
                     console.log("five card charlie");
-
+                    this.secondHandMessage("Five Card Charlie - BlackJack! ");
+                    this.firstHand();
                 }
+
             }
 
             doubleDown() {
+                //if () {
                 console.log("first " + this.bank);
                 deck.pot += this.totalBet;
                 console.log("second " + this.bank);
@@ -150,10 +190,11 @@
                 this.totalBet = this.totalBet * 2;
                 console.log("thisbet " + this.totalBet);
                 console.log("forth " + this.bank);
-                player.hit();
+                this.hit();
                 let img = document.getElementById(7);
                 img.setAttribute('style', 'transform:rotate(90deg)');
                 deck.dealerPlay();
+                //}
             }
 
             aceToOne() {
@@ -175,6 +216,11 @@
                         }
                     }
                 }
+            }
+
+            resetPlayerSecond() {
+                let i = document.getElementById("player2nd");
+                i.innerHTML = "";
             }
         }
 
@@ -280,22 +326,10 @@
                 deck.decideWinner(player);
             }
 
-            EOG() {
-                player.secondHandValue = 0;
-                player.second = [];
-                this.pot = 0;
-                player.totalBet = 0;
-                this.dealerHand = [];
-                player.playerHand = [];
-                this.dealerHandValue = 0;
-                player.playerHandValue = 0;
-                deck.lowCardShuffle();
-            }
-
             lowCardShuffle() {
                 var tmpDeck = new Deck();
                 tmpDeck.shuffle();
-                this.deck.deck = tmpDeck.deck;
+                this.deck = tmpDeck.deck;
             }
 
             decideWinner(player) {
@@ -343,14 +377,13 @@
                     console.log("UH OH")
                 }
 
-                if (player.secondHandValue == 0) {
+                if (player.secondHandValue === 0) {
                     deck.updateMSG();
                     deck.EOG();
                 }
                 else {
                     deck.decideSplitWinner(player);
                 }
-
             }
 
             decideSplitWinner(player) {
@@ -447,6 +480,20 @@
             bust() {
                 console.log("Player Bust")
             }
+
+            EOG() {
+                player.secondHandValue = 0;
+                player.second = [];
+                this.pot = 0;
+                player.totalBet = 0;
+                this.dealerHand = [];
+                player.playerHand = [];
+                this.dealerHandValue = 0;
+                player.playerHandValue = 0;
+                this.lowCardShuffle();
+                player.resetPlayerSecond();
+                player.checkBankrupt();//this is in the wrong location
+            }
         }
 
         window.onload = function () {
@@ -454,9 +501,7 @@
         };
         let deck = new Deck();
         let player = new Player();
-
     </script>
-
     </body>
 {% endblock %}
 

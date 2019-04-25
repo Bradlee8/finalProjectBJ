@@ -71,13 +71,15 @@
             }
 
             bet() {
-                console.log(this.bank);
-                let bet = 50;
-                this.totalBet += 50;
-                this.bank = this.bank - bet;
-                console.log("player bet 50 ", this.bank);
-                deck.pot += 50;
-                deck.updateMSG();
+                if (player.playerHandValue === 0) {
+                    console.log(this.bank);
+                    let bet = 50;
+                    this.totalBet += 50;
+                    this.bank = this.bank - bet;
+                    console.log("player bet 50 ", this.bank);
+                    deck.pot += 50;
+                    deck.updateMSG();
+                }
             }
 
             split() {
@@ -219,23 +221,23 @@
             }
 
             deal() {
-                if (player.playerHandValue === 0 ){
+                if (player.playerHandValue === 0) {
                     for (let z = 0; z < 15; z++) {
                         let x = document.getElementById(z);
                         x.src = "/static/cards/blank.jpg";
                     }
                     let img = document.getElementById(7);
                     img.setAttribute('style', 'transform:rotate(0deg)');
-                        this.dealerHandValue = this.getValue();
-                        this.dealerHand.push(this.deck.pop());
-                        player.playerHandValue = this.getValue();
-                        player.playerHand.push(this.deck.pop());
-                        this.dealerHandValue += this.getValue();
-                        this.dealerHand.push(this.deck.pop());
-                        player.playerHandValue += this.getValue();
-                        player.playerHand.push(this.deck.pop());
-                        console.log("dealer Hand value", this.dealerHandValue);
-                        console.log("player Hand value", player.playerHandValue);
+                    this.dealerHandValue = this.getValue();
+                    this.dealerHand.push(this.deck.pop());
+                    player.playerHandValue = this.getValue();
+                    player.playerHand.push(this.deck.pop());
+                    this.dealerHandValue += this.getValue();
+                    this.dealerHand.push(this.deck.pop());
+                    player.playerHandValue += this.getValue();
+                    player.playerHand.push(this.deck.pop());
+                    console.log("dealer Hand value", this.dealerHandValue);
+                    console.log("player Hand value", player.playerHandValue);
                     deck.getDealerDeal();
                     player.getPlayerCards();
                     deck.dealerAceToOne(this.dealerHandValue);
