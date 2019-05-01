@@ -20,18 +20,6 @@ login_manager = LoginManager(app)
 login_manager.init_app(app)
 
 
-#@app.route('/ajax')
-#def ajax():
-    #user = Player.query.filter_by(username=Table.query.get(1).player1).first()
-    #return jsonify(n=user.username, id=user.id, b=user.bank)
-
-
-#@app.route('/bet')
-#def bet():
-   # bet = Player.query.filter_by(userename=Table.query.get(1)).first()
-    #return jsonify(n=bet.username, id=bet.id, b=bet.bank)
-
-
 @app.route('/')
 def home():
     return render_template('Home.html')
@@ -45,7 +33,6 @@ def create_user():
     if request.method == 'POST':
         username = str(request.form['username'])
         password = str(request.form['password'])
-        player = str(request.form['player'])
         bank = int(500)
         user = User.query.filter_by(username=username).first()
         if user is not None:
@@ -99,46 +86,33 @@ def secret():
 @app.route('/table', methods=['GET', 'POST'])
 @login_required
 def table():
-     #player = current_user.username
-    #table = Table.query.get(1)
-    #if table.player1 == None:
-      #  table.player1 = player
-    #elif table.player2 == None:
-       # table.player2 = player
-    #elif table.player3 == None:
-     #   table.player3 = player
-    #elif table.player4 == None:
-     #   table.player4 = player
-    #else:
-        #logout = "Table is full try again later"
-        #return render_template('Home.html', logout=logout)
     db.session.commit()
     return render_template('table.html', name=current_user.username)
 
 
 @app.errorhandler(404)
 def error404(err):
-    return render_template('404.html', err=err)
+    return render_template('errorHandling/404.html', err=err)
 
 
 @app.errorhandler(400)
 def error400(err):
-    return render_template('400.html', err=err)
+    return render_template('errorHandling/400.html', err=err)
 
 
 @app.errorhandler(401)
 def error401(err):
-    return render_template('401.html', err=err)
+    return render_template('errorHandling/401.html', err=err)
 
 
 @app.errorhandler(403)
 def error403(err):
-    return render_template('403.html', err=err)
+    return render_template('errorHandling/403.html', err=err)
 
 
 @app.errorhandler(502)
 def error502(err):
-    return render_template('502.html', err=err)
+    return render_template('errorHandling/502.html', err=err)
 
 
 if __name__ == '__main__':

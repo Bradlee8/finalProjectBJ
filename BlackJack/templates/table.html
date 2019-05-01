@@ -47,7 +47,7 @@
                 this.totalBet = 0;
                 this.second = [];//second hand in the split
                 this.secondHandValue = 0;
-                this.goSplit = false;
+                this.goSplit = false;//flag for split
             }
 
             getPlayerCards() {
@@ -58,25 +58,33 @@
             }
 
             hit() {
-                this.playerHandValue += deck.getValue();
-                this.playerHand.push(deck.deck.pop());
-                console.log(this.playerHand);
-                console.log("player hand value ", this.playerHandValue);
-                this.aceToOne();
-                this.getPlayerCards();
-                deck.checkPoints();
+                if (this.playerHand[1] != null && this.playerHandValue < 22) {
+                    this.playerHandValue += deck.getValue();
+                    this.playerHand.push(deck.deck.pop());
+                    console.log(this.playerHand);
+                    console.log("player hand value ", this.playerHandValue);
+                    this.aceToOne();
+                    this.getPlayerCards();
+                    deck.checkPoints();
+                }
             }
 
             stay() {
                 deck.dealerPlay();
             }
 
+            getLoan() {
+                this.bank = 500;
+            }
+
             checkBankrupt() {
-                    if (this.bank === 0) {
-                        if (window.confirm("You are Broke!\nWant a loan?")) {
-                            this.bank = 500;
-                            deck.updateMSG();
-                    }
+                if (this.bank === 0) {
+                    setTimeout(function () {
+                        window.confirm("You are Broke!\nWant a loan?");
+                        player.getLoan();
+                        deck.updateMSG();
+
+                    }, 1000);
                 }
             }
 
@@ -120,12 +128,18 @@
                         x.src = this.second[z].Card;
                         console.log("playerHand " + this.playerHandValue);
                     }
+                    if (this.playerHand[0].PointValue === 1) {
+                        this.playerHand[0].PointValue = 11;
+                        this.playerHandValue += 10;
+                    }
                     this.aceToOne();
                     this.checkSplitPoints();
                     this.goSplit = true;
                 }
             }
+            aceOnetoEleven(){
 
+            }
             splitHit() {
                 if (this.goSplit === true) {
                     this.secondHandValue += deck.getValue();
@@ -148,9 +162,11 @@
             }
 
             staySecond() {
-                this.goSplit = false;
-                this.secondHandMessage("Stayed");
-                this.firstHand();
+                if (this.goSplit === true) {
+                    this.goSplit = false;
+                    this.secondHandMessage("Stayed");
+                    this.firstHand();
+                }
             }
 
             secondHandMessage(x) {
@@ -179,41 +195,51 @@
             }
 
             doubleDown() {
-                //if () {
-                console.log("first " + this.bank);
-                deck.pot += this.totalBet;
-                console.log("second " + this.bank);
-                console.log("thisbet " + this.totalBet);
-                this.bank -= this.totalBet;
-                console.log("thisbet " + this.totalBet);
-                console.log("third " + this.bank);
-                this.totalBet = this.totalBet * 2;
-                console.log("thisbet " + this.totalBet);
-                console.log("forth " + this.bank);
-                this.hit();
-                let img = document.getElementById(7);
-                img.setAttribute('style', 'transform:rotate(90deg)');
-                deck.dealerPlay();
-                //}
+                if (this.playerHand.length === 2 && this.bank >= this.totalBet &&
+                    9 <= this.playerHandValue && this.playerHandValue <= 11) {
+                    console.log("first " + this.bank);
+                    deck.pot += this.totalBet;
+                    console.log("second " + this.bank);
+                    console.log("thisbet " + this.totalBet);
+                    this.bank -= this.totalBet;
+                    console.log("thisbet " + this.totalBet);
+                    console.log("third " + this.bank);
+                    this.totalBet = this.totalBet * 2;
+                    console.log("thisbet " + this.totalBet);
+                    console.log("forth " + this.bank);
+                    this.hit();
+                    let img = document.getElementById(7);
+                    img.setAttribute('style', 'transform:rotate(90deg)');
+                    deck.dealerPlay();
+                }
             }
 
             aceToOne() {
                 if (this.playerHandValue > 21) {
-                    for (let t = 0; t < this.playerHand.length; t++) {
-                        if (this.playerHand[t].PointValue === 11) {
-                            this.playerHand[t].PointValue = 1;
+                    let count = 0;
+                    while (count < this.playerHand.length) {
+                        if (this.playerHand[count].PointValue === 11) {
+                            this.playerHand[count].PointValue = 1;
                             this.playerHandValue -= 10;
+                            count = 5;
                             console.log("switch to " + this.playerHandValue);
+                            console.log("hand length " + player.playerHand.length);
                         }
+                        count++;
                     }
                 }
+
                 if (this.secondHandValue > 21) {
-                    for (let t = 0; t < this.second.length; t++) {
-                        if (this.second[t].PointValue === 11) {
-                            this.second[t].PointValue = 1;
+                    let count = 0;
+                    while (count < this.second.length) {
+                        if (this.second[count].PointValue === 11) {
+                            this.second[count].PointValue = 1;
                             this.secondHandValue -= 10;
+                            count = 5;
                             console.log("switch to " + this.secondHandValue);
+                            console.log("hand 2 length " + player.second.length);
                         }
+                        count++;
                     }
                 }
             }
@@ -285,7 +311,7 @@
                     deck.getDealerDeal();
                     player.getPlayerCards();
                     deck.dealerAceToOne(this.dealerHandValue);
-                    player.aceToOne(player.playerHandValue);
+                    player.aceToOne();
                     deck.checkPoints();
                     deck.updateMSG();
                 }
@@ -437,17 +463,9 @@
 
 
             getValue() {
-
                 return this.deck[this.deck.length - 1].PointValue;
             }
 
-            checkSplit() {//add this.splitCase = false to EOG***
-                this.splitCase = false;
-                if (player.playerHand[0].Value === player.playerHand[1].Value) {
-                    this.splitCase = true;
-                    console.log("double down");
-                }
-            }
 
             checkPoints() {
                 if (player.playerHandValue > 21) {
