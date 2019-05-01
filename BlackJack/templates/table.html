@@ -4,6 +4,11 @@
     </head>
     <body>
     <div id="container">
+        <div id="split">
+            <button onclick="deck.testSplitAces();">TEST SPLIT</button>
+            <button onclick="deck.testDoubleDown();">TEST DOUBLEDOWN</button>
+            <h3>Must refresh page <br>push button once, then play hand</h3>
+        </div>
         <h1 id="dealer">dealer</h1>
         <img id="0" width="50">
         <img id="1" width="50">
@@ -110,6 +115,10 @@
                     this.playerHand.pop();
                     this.playerHandValue += deck.getValue();
                     this.playerHand.push(deck.deck.pop());
+                    if (this.playerHand[0].PointValue === 1) {
+                        this.playerHand[0].PointValue = 11;
+                        this.playerHandValue += 10;
+                    }
                     for (let h = 0; h < this.playerHand.length; h++) {
                         let q = document.getElementById(h + 5);
                         q.src = this.playerHand[h].Card;
@@ -128,18 +137,12 @@
                         x.src = this.second[z].Card;
                         console.log("playerHand " + this.playerHandValue);
                     }
-                    if (this.playerHand[0].PointValue === 1) {
-                        this.playerHand[0].PointValue = 11;
-                        this.playerHandValue += 10;
-                    }
                     this.aceToOne();
                     this.checkSplitPoints();
                     this.goSplit = true;
                 }
             }
-            aceOnetoEleven(){
 
-            }
             splitHit() {
                 if (this.goSplit === true) {
                     this.secondHandValue += deck.getValue();
@@ -255,6 +258,7 @@
                 this.dealerHand = [];
                 this.deck = [];
                 this.pot = 0;
+                this.green =false;
                 let suits = ['Hearts', 'Spades', 'Clubs', 'Diamonds'];
                 let values = ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 10, 'Jack', 'Queen', 'King'];
                 for (let r = 0; r < suits.length; r++) {
@@ -290,12 +294,32 @@
                 }
             }
 
+            testSplitAces() {
+                this.green = true;
+                for (let k = 0; k < this.deck.length; k++) {
+                    let count = 0;
+                    for (let l = 0; l < this.deck.length; l++) {
+                        if (this.deck[l].PointValue === 11 && count < 5) {
+                            let tmp = this.deck[l];
+                            this.deck[l] = this.deck[51 - count];
+                            this.deck[51 - count] = tmp;
+                            count++;
+                        }
+                    }
+                }
+            }
+
+            testDoubleDown(){
+
+            }
             deal() {
                 if (player.playerHandValue === 0) {
                     for (let z = 0; z < 15; z++) {
                         let x = document.getElementById(z);
                         x.src = "/static/cards/blank.jpg";
                     }
+                    if (this.green === true){
+                    deck.testSplitAces();}
                     let img = document.getElementById(7);
                     img.setAttribute('style', 'transform:rotate(0deg)');
                     this.dealerHandValue = this.getValue();
@@ -510,7 +534,8 @@
                 player.playerHandValue = 0;
                 this.lowCardShuffle();
                 player.resetPlayerSecond();
-                player.checkBankrupt();//this is in the wrong location
+                player.checkBankrupt();
+                this.green = false;
             }
         }
 

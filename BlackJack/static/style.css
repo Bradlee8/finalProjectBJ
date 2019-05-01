@@ -22,3 +22,7 @@ nav ul li{
 nav ul li.hover{
     color: orangered;
 }
+
+#split{
+    float: right;
+}
