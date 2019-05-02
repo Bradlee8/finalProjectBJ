@@ -87,7 +87,7 @@ def secret():
 @login_required
 def table():
     db.session.commit()
-    return render_template('table.html', name=current_user.username)
+    return render_template('table.html', name=current_user.username, bank=current_user.bank)
 
 
 @app.errorhandler(404)
