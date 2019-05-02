@@ -4,6 +4,11 @@
     </head>
     <body>
     <div id="container">
+        <div id="split">
+            <button onclick="deck.testSplitAces();">TEST SPLIT</button>
+            <button onclick="deck.testDoubleDown();">TEST DOUBLEDOWN</button>
+            <h3>Push button once, then play hand</h3>
+        </div>
         <h1 id="dealer">dealer</h1>
         <img id="0" width="50">
         <img id="1" width="50">
@@ -40,14 +45,14 @@
     <script>
         class Player {
             constructor() {
-                this.name = "Player1"; //Will be call to db name info
-                this.bank = 500;  //Will be call to db bank info
+                this.name = "Player1";
+                this.bank = 500;
                 this.playerHand = [];
                 this.playerHandValue = 0;
                 this.totalBet = 0;
-                this.second = [];//second hand in the split
+                this.second = [];
                 this.secondHandValue = 0;
-                this.goSplit = false;//flag for split
+                this.goSplit = false;
             }
 
             getPlayerCards() {
@@ -57,10 +62,14 @@
                 }
             }
 
+            pushPlayerCard() {
+                this.playerHandValue += deck.getValue();
+                this.playerHand.push(deck.deck.pop());
+            }
+
             hit() {
-                if (this.playerHand[1] != null && this.playerHandValue < 22) {
-                    this.playerHandValue += deck.getValue();
-                    this.playerHand.push(deck.deck.pop());
+                if (this.playerHand[1] != null && this.playerHandValue < 21) {
+                    this.pushPlayerCard();
                     console.log(this.playerHand);
                     console.log("player hand value ", this.playerHandValue);
                     this.aceToOne();
@@ -72,7 +81,8 @@
             stay() {
                 deck.dealerPlay();
             }
-            getLoan(){
+
+            getLoan() {
                 this.bank = 500;
             }
 
@@ -80,8 +90,8 @@
                 if (this.bank === 0) {
                     setTimeout(function () {
                         window.confirm("You are Broke!\nWant a loan?");
-                            player.getLoan();
-                            deck.updateMSG();
+                        player.getLoan();
+                        deck.updateMSG();
 
                     }, 1000);
                 }
@@ -100,15 +110,18 @@
             }
 
             split() {
-                if (this.playerHand[0].Value === this.playerHand[1].Value) {
+                if (this.playerHand[0].Value === this.playerHand[1].Value && this.bank >= this.totalBet) {
                     let g = document.getElementById("player");
                     g.innerHTML = this.name + " 1st Hand: Bank: " + this.bank;
                     this.playerHandValue -= this.playerHand[1].PointValue;
                     this.second.push(this.playerHand[1]);
                     this.secondHandValue = this.second[0].PointValue;
                     this.playerHand.pop();
-                    this.playerHandValue += deck.getValue();
-                    this.playerHand.push(deck.deck.pop());
+                    this.pushPlayerCard();
+                    if (this.playerHand[0].PointValue === 1) {
+                        this.playerHand[0].PointValue = 11;
+                        this.playerHandValue += 10;
+                    }
                     for (let h = 0; h < this.playerHand.length; h++) {
                         let q = document.getElementById(h + 5);
                         q.src = this.playerHand[h].Card;
@@ -120,8 +133,7 @@
                     deck.updateMSG();
                     let t = document.getElementById("player2nd");
                     t.innerHTML = this.name + " 2nd Hand: Bank: " + this.bank;
-                    this.secondHandValue += deck.getValue();
-                    this.second.push(deck.deck.pop());
+                    this.pushSecondHand();
                     for (let z = 0; z < this.second.length; z++) {
                         let x = document.getElementById(z + 10);
                         x.src = this.second[z].Card;
@@ -132,12 +144,15 @@
                     this.goSplit = true;
                 }
             }
+            pushSecondHand(){
+                this.secondHandValue += deck.getValue();
+                this.second.push(deck.deck.pop());
+            }
 
             splitHit() {
                 if (this.goSplit === true) {
-                    this.secondHandValue += deck.getValue();
+                    this.pushSecondHand();
                     console.log("3 SEcond hand value " + this.secondHandValue);
-                    this.second.push(deck.deck.pop());
                     for (let z = 0; z < this.second.length; z++) {
                         let x = document.getElementById(z + 10);
                         x.src = this.second[z].Card;
@@ -209,21 +224,30 @@
 
             aceToOne() {
                 if (this.playerHandValue > 21) {
-                    for (let t = 0; t < this.playerHand.length; t++) {
-                        if (this.playerHand[t].PointValue === 11) {
-                            this.playerHand[t].PointValue = 1;
+                    let count = 0;
+                    while (count < this.playerHand.length) {
+                        if (this.playerHand[count].PointValue === 11) {
+                            this.playerHand[count].PointValue = 1;
                             this.playerHandValue -= 10;
+                            count = 5;
                             console.log("switch to " + this.playerHandValue);
+                            console.log("hand length " + player.playerHand.length);
                         }
+                        count++;
                     }
                 }
+
                 if (this.secondHandValue > 21) {
-                    for (let t = 0; t < this.second.length; t++) {
-                        if (this.second[t].PointValue === 11) {
-                            this.second[t].PointValue = 1;
+                    let count = 0;
+                    while (count < this.second.length) {
+                        if (this.second[count].PointValue === 11) {
+                            this.second[count].PointValue = 1;
                             this.secondHandValue -= 10;
+                            count = 5;
                             console.log("switch to " + this.secondHandValue);
+                            console.log("hand 2 length " + player.second.length);
                         }
+                        count++;
                     }
                 }
             }
@@ -239,6 +263,7 @@
                 this.dealerHand = [];
                 this.deck = [];
                 this.pot = 0;
+                this.splitTestLock = false;
                 let suits = ['Hearts', 'Spades', 'Clubs', 'Diamonds'];
                 let values = ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 10, 'Jack', 'Queen', 'King'];
                 for (let r = 0; r < suits.length; r++) {
@@ -274,11 +299,33 @@
                 }
             }
 
+            testSplitAces() {
+                this.splitTestLock = true;
+                for (let k = 0; k < this.deck.length; k++) {
+                    let count = 0;
+                    for (let l = 0; l < this.deck.length; l++) {
+                        if (this.deck[l].PointValue === 11 && count < 5) {
+                            let tmp = this.deck[l];
+                            this.deck[l] = this.deck[51 - count];
+                            this.deck[51 - count] = tmp;
+                            count++;
+                        }
+                    }
+                }
+            }
+
+            testDoubleDown() {
+
+            }
+
             deal() {
                 if (player.playerHandValue === 0) {
                     for (let z = 0; z < 15; z++) {
                         let x = document.getElementById(z);
                         x.src = "/static/cards/blank.jpg";
+                    }
+                    if (this.splitTestLock === true) {
+                        deck.testSplitAces();
                     }
                     let img = document.getElementById(7);
                     img.setAttribute('style', 'transform:rotate(0deg)');
@@ -286,10 +333,8 @@
                     this.dealerHand.push(this.deck.pop());
                     player.playerHandValue = this.getValue();
                     player.playerHand.push(this.deck.pop());
-                    this.dealerHandValue += this.getValue();
-                    this.dealerHand.push(this.deck.pop());
-                    player.playerHandValue += this.getValue();
-                    player.playerHand.push(this.deck.pop());
+                    this.pushDealerCards();
+                    player.pushPlayerCard();
                     console.log("dealer Hand value", this.dealerHandValue);
                     console.log("player Hand value", player.playerHandValue);
                     deck.getDealerDeal();
@@ -302,7 +347,7 @@
             }
 
             updateMSG() {
-                var x = document.getElementById("player");
+                let x = document.getElementById("player");
                 x.innerHTML = player.name + " Bank:" + player.bank +
                     " HandValue:" + player.playerHandValue;
             }
@@ -320,11 +365,14 @@
                     x.src = this.dealerHand[z].Card;
                 }
             }
+            pushDealerCards(){
+                this.dealerHandValue += this.getValue();
+                this.dealerHand.push(this.deck.pop());
+            }
 
             dealerPlay() {
-                while (this.dealerHandValue < 18) {
-                    this.dealerHandValue += this.getValue();
-                    this.dealerHand.push(this.deck.pop());
+                while (this.dealerHandValue < 17) {
+                    this.pushDealerCards();
                     console.log(this.dealerHand);
                     deck.dealerAceToOne(this.dealerHandValue);
                     if (this.dealerHandValue < 22 && this.dealerHand[4] != null) {
@@ -494,7 +542,8 @@
                 player.playerHandValue = 0;
                 this.lowCardShuffle();
                 player.resetPlayerSecond();
-                player.checkBankrupt();//this is in the wrong location
+                player.checkBankrupt();
+                this.splitTestLock = false;
             }
         }
 
