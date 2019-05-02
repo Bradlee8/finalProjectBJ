@@ -7,7 +7,7 @@
         <div id="split">
             <button onclick="deck.testSplitAces();">TEST SPLIT</button>
             <button onclick="deck.testDoubleDown();">TEST DOUBLEDOWN</button>
-            <h3>Push button once, then play hand</h3>
+            <h3>Push button once, then DEAL hand</h3>
         </div>
         <h1 id="dealer">dealer</h1>
         <img id="0" width="50">
@@ -45,8 +45,8 @@
     <script>
         class Player {
             constructor() {
-                this.name = "Player1";
-                this.bank = 500;
+                this.name = "{{ name}}";
+                this.bank = "{{ bank}}";
                 this.playerHand = [];
                 this.playerHandValue = 0;
                 this.totalBet = 0;
@@ -75,6 +75,7 @@
                     this.aceToOne();
                     this.getPlayerCards();
                     deck.checkPoints();
+                    deck.updateMSG();
                 }
             }
 
@@ -99,6 +100,7 @@
 
             bet() {
                 if (this.playerHandValue === 0 && this.bank > 0) {
+                    this.resetPlayerSecond();
                     console.log(this.bank);
                     let bet = 50;
                     this.totalBet += 50;
@@ -300,6 +302,19 @@
                 }
             }
 
+            updateBank() {
+                var xhttp = new XMLHttpRequest();
+                var bank = player.bank;
+                var name = player.name;
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState === 4 && this.status === 200) {
+                    }
+                };
+                xhttp.open("GET", "/updateBank/" + name + "/" + bank, true);
+                xhttp.send();
+            }
+
+
             testSplitAces() {
                 this.splitTestLock = true;
                 for (let k = 0; k < this.deck.length; k++) {
@@ -319,12 +334,6 @@
                 for (let k = 0; k < this.deck.length; k++) {
                     let count = 0;
                     for (let l = 0; l < this.deck.length - count; l++) {
-                        if (this.deck[l].PointValue === 4 && count < 5) {
-                            let tmp = this.deck[l];
-                            this.deck[l] = this.deck[51 - count];
-                            this.deck[51 - count] = tmp;
-                            count++;
-                        }
                         if (this.deck[l].PointValue === 5 && count < 5) {
                             let tmp = this.deck[l];
                             this.deck[l] = this.deck[51 - count];
@@ -551,6 +560,7 @@
             }
 
             EOG() {
+                this.updateBank();
                 player.secondHandValue = 0;
                 player.second = [];
                 this.pot = 0;
@@ -560,9 +570,9 @@
                 this.dealerHandValue = 0;
                 player.playerHandValue = 0;
                 this.lowCardShuffle();
-                player.resetPlayerSecond();
                 player.checkBankrupt();
-                this.splitTestLock = false;
+                player.secondHandMessage("*****Make Bet******"),
+                    this.splitTestLock = false;
             }
         }
 

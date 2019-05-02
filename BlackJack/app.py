@@ -83,11 +83,18 @@ def secret():
         return current_user.player + ' secret message!'
 
 
+@app.route('/updateBank/<name>/<bank>')
+def updateBank(name, bank):
+   User.query.filter_by(username=name).first().bank = int(bank)
+   db.session.commit()
+   return jsonify(success=True)
+
+
 @app.route('/table', methods=['GET', 'POST'])
 @login_required
 def table():
-    db.session.commit()
-    return render_template('table.html', name=current_user.username, bank=current_user.bank)
+   db.session.commit()
+   return render_template('table.html', bank=current_user.bank, name=current_user.username)
 
 
 @app.errorhandler(404)
