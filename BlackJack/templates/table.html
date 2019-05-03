@@ -7,6 +7,7 @@
         <div id="split">
             <button onclick="deck.testSplitAces();">TEST SPLIT</button>
             <button onclick="deck.testDoubleDown();">TEST DOUBLEDOWN</button>
+            <button onclick="deck.testBlackJack();">TEST BLACKJACK</button>
             <h3>Push button once, then DEAL hand</h3>
         </div>
         <h1 id="dealer">dealer</h1>
@@ -344,6 +345,23 @@
                 }
 
             }
+
+            testBlackJack() {
+                deck.testSplitAces();
+                for (let k = 0; k < this.deck.length; k++) {
+                    let count = 0;
+                    for (let l = 0; l < this.deck.length - count; l++) {
+                        if (this.deck[l].Value === "Jack" && count < 1) {
+                            let tmp = this.deck[l];
+                            this.deck[l] = this.deck[48];
+                            this.deck[48] = tmp;
+                            count++;
+                        }
+                    }
+                }
+
+            }
+
 
             deal() {
                 if (player.playerHandValue === 0) {
