@@ -8,7 +8,7 @@
             <button onclick="deck.testSplitAces();">TEST SPLIT</button>
             <button onclick="deck.testDoubleDown();">TEST DOUBLEDOWN</button>
             <button onclick="deck.testBlackJack();">TEST BLACKJACK</button>
-            <h3>Push button once, then DEAL hand</h3>
+            <h3>Push button once before DEAL, then DEAL hand</h3>
         </div>
         <h1 id="dealer">dealer</h1>
         <img id="0" width="50">
@@ -54,6 +54,8 @@
                 this.second = [];
                 this.secondHandValue = 0;
                 this.goSplit = false;
+                this.firstHandLock = "off";
+                this.betLock = "on";
             }
 
             getPlayerCards() {
@@ -69,7 +71,7 @@
             }
 
             hit() {
-                if (this.playerHand[1] != null && this.playerHandValue < 21) {
+                if (this.playerHand[1] != null && this.playerHandValue < 21 && this.firstHandLock === "off") {
                     this.pushPlayerCard();
                     console.log(this.playerHand);
                     console.log("player hand value ", this.playerHandValue);
@@ -81,11 +83,14 @@
             }
 
             stay() {
-                deck.dealerPlay();
+                if (this.playerHand[1] != null && this.firstHandLock === "off") {
+                    deck.dealerPlay();
+                }
             }
 
             getLoan() {
                 this.bank = 500;
+                deck.updateBank();
             }
 
             checkBankrupt() {
@@ -94,13 +99,13 @@
                         window.confirm("You are Broke!\nWant a loan?");
                         player.getLoan();
                         deck.updateMSG();
-
                     }, 1000);
                 }
             }
 
             bet() {
                 if (this.playerHandValue === 0 && this.bank > 0) {
+                    this.betLock = "off";
                     this.resetPlayerSecond();
                     console.log(this.bank);
                     let bet = 50;
@@ -111,7 +116,12 @@
                     deck.updateMSG();
                 }
             }
-
+            aceOneToEleven(){
+              if (this.playerHand[0].PointValue === 1) {
+                        this.playerHand[0].PointValue = 11;
+                        this.playerHandValue += 10;
+                    }
+            }
             split() {
                 if (this.playerHand[0].Value === this.playerHand[1].Value && this.bank >= this.totalBet) {
                     let g = document.getElementById("player");
@@ -121,14 +131,8 @@
                     this.secondHandValue = this.second[0].PointValue;
                     this.playerHand.pop();
                     this.pushPlayerCard();
-                    if (this.playerHand[0].PointValue === 1) {
-                        this.playerHand[0].PointValue = 11;
-                        this.playerHandValue += 10;
-                    }
-                    for (let h = 0; h < this.playerHand.length; h++) {
-                        let q = document.getElementById(h + 5);
-                        q.src = this.playerHand[h].Card;
-                    }
+                    this.aceOneToEleven();
+                    this.getPlayerCards();
                     let text = " Must play Second Hand First ";
                     let u = document.getElementById("winner");
                     u.innerHTML = "<h1>" + text.fontcolor("white") + "</h1>";
@@ -136,15 +140,19 @@
                     deck.updateMSG();
                     let t = document.getElementById("player2nd");
                     t.innerHTML = this.name + " 2nd Hand: Bank: " + this.bank;
+                    this.firstHandLock = "on";
                     this.pushSecondHand();
-                    for (let z = 0; z < this.second.length; z++) {
-                        let x = document.getElementById(z + 10);
-                        x.src = this.second[z].Card;
-                        console.log("playerHand " + this.playerHandValue);
-                    }
+                    this.displaySecondHand();
                     this.aceToOne();
                     this.checkSplitPoints();
                     this.goSplit = true;
+                }
+            }
+
+            displaySecondHand() {
+                for (let z = 0; z < this.second.length; z++) {
+                    let x = document.getElementById(z + 10);
+                    x.src = this.second[z].Card;
                 }
             }
 
@@ -157,10 +165,7 @@
                 if (this.goSplit === true) {
                     this.pushSecondHand();
                     console.log("3 SEcond hand value " + this.secondHandValue);
-                    for (let z = 0; z < this.second.length; z++) {
-                        let x = document.getElementById(z + 10);
-                        x.src = this.second[z].Card;
-                    }
+                    this.displaySecondHand();
                     console.log("second " + this.secondHandValue);
                     this.aceToOne();
                     this.checkSplitPoints();
@@ -168,6 +173,7 @@
             }
 
             firstHand() {
+                this.firstHandLock = "off";
                 let text = "Now play First Hand";
                 let y = document.getElementById("winner");
                 y.innerHTML = "<h1>" + text.fontcolor("white") + "</h1>";
@@ -176,6 +182,7 @@
             staySecond() {
                 if (this.goSplit === true) {
                     this.goSplit = false;
+                    this.firstHandLock = "off";
                     this.secondHandMessage("Stayed");
                     this.firstHand();
                 }
@@ -192,6 +199,7 @@
                     this.secondHandMessage("-BUSTED-");
                     console.log("Second Hand Busts");
                     this.firstHand();
+
                 }
                 if (this.secondHandValue === 21) {
                     this.firstHand();
@@ -364,7 +372,7 @@
 
 
             deal() {
-                if (player.playerHandValue === 0) {
+                if (player.playerHandValue === 0 && player.betLock === "off") {
                     for (let z = 0; z < 15; z++) {
                         let x = document.getElementById(z);
                         x.src = "/static/cards/blank.jpg";
@@ -589,8 +597,9 @@
                 player.playerHandValue = 0;
                 this.lowCardShuffle();
                 player.checkBankrupt();
-                player.secondHandMessage("*****Make Bet******"),
-                    this.splitTestLock = false;
+                player.secondHandMessage("*****Make Bet******");
+                this.splitTestLock = false;
+                player.betLock = "on";
             }
         }
 
