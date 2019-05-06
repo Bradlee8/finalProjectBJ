@@ -1,21 +1,23 @@
 nav{
-    background-color: palegoldenrod;
-    border: black solid;
-    width: 100%;
+    background-color: transparent;
+    border: solid green ;
+    width: 60%;
+    margin-left: 5%;
 }
 
 nav ul{
     color: whitesmoke;
     list-style-type: none;
-    padding: 1%;
+    padding: .3%;
 }
 
 nav ul li{
     display: inline;
-    border: solid black;
-    margin: 2%;
-    padding: 1% 4%;
-    background-color: palegoldenrod;
+    border-style: inset;
+    border-radius: 25px;
+    margin: .5%;
+    padding: .5% 4%;
+    background-color: green;
 
 }
 
@@ -23,6 +25,18 @@ nav ul li.hover{
     color: orangered;
 }
 
+button{
+      border-radius: 25px;
+}
 #split{
     float: right;
+}
+#dealerFloat{
+    margin-left: 10%;
+}
+#cover{
+    margin-left: 25%;
+}
+#container{
+     border-radius: 25px;
 }

@@ -1,8 +1,15 @@
-{% extends "base.html"%}
+{% extends "base.html" %}
 {% block title %}Home page{% endblock %}
 {% block content %}
-<h1>Home page</h1>
-
-<h1>{{logout}}</h1>
-
+    <div id=cover>
+        <br>
+        <br>
+        <h1 style="color: darkred">BlackJack</h1>
+        <br>
+        <br>
+        <br>
+        <img src="/static/cards/JC.jpg" width="200" style="transform: rotate(340deg)">
+        <img src="/static/cards/AS.jpg" width="200" style="transform: rotate(25deg)">
+    </div>
+    <h1>{{ logout }}</h1>
 {% endblock %}
